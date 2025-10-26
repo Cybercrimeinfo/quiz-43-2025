@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>De Wekelijkse Digitale Weerbaarheid Quiz — Week 43-2025</title>
+  <style>
+    :root { --maxw: 960px; }
+    body { font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.5; margin: 0; background: #296F87; color: #e8eef8; }
+    a { color: inherit; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 24px; }
+    header { padding: 16px 0 8px; }
+    h1 { font-size: clamp(1.4rem, 2.5vw, 2rem); margin: 0 0 4px; }
+    .sub { opacity: .8; font-size: .95rem; margin-bottom: 16px; }
+    .card { background: #121a2b; border: 1px solid #29324a; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+    .card .in { padding: 20px; }
+    .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+    button { cursor: pointer; border: 0; padding: 10px 16px; border-radius: 12px; font-weight: 600; }
+    .btn-primary { background: #3a86ff; color: white; }
+    .btn-secondary { background: #2a334a; color: #e8eef8; }
+    .btn-danger { background: #ef476f; color: white; }
+    .muted { opacity: .75; }
+
+    .q { padding: 18px; border: 1px solid #233153; border-radius: 12px; margin-bottom: 16px; background: #0f1526; }
+    .q h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    .q .meta { font-size: .85rem; opacity: .8; margin-bottom: 8px; }
+    .options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    label.opt { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; padding: 10px; border-radius: 10px; border: 1px solid #223153; background: #0c1222; }
+    input[type="radio"] { transform: translateY(2px); }
+    .result { margin-top: 20px; padding: 16px; border-radius: 12px; border: 1px solid #2a3b66; background: #0c1426; }
+    .stat { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .8rem; font-weight: 700; }
+    .ok { background: #144d2a; color: #a6f4c5; }
+    .ko { background: #5b1d2b; color: #fec5d0; }
+    .warn { background: #42340b; color: #ffe5a1; }
+    .perq { border-top: 1px dashed #2d3d64; padding-top: 12px; margin-top: 12px; }
+    .perq h4 { margin: 0 0 6px; font-size: .95rem; }
+    .key { opacity: .9; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    footer { margin: 32px 0; opacity: .7; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>De Wekelijkse Digitale Weerbaarheid Quiz — Week 43-2025</h1>
+      <div class="sub">Periode: 20 t/m 25 oktober 2025 · 20 meerkeuzevragen · bron: Journaals & “Vraag van de week”.</div>
+    </header>
+
+    <section class="card">
+      <div class="in">
+        <div id="quiz"></div>
+        <div class="actions">
+          <button id="submit" class="btn-primary">Inleveren en nakijken</button>
+          <button id="reset" class="btn-secondary">Opnieuw beginnen</button>
+          <span class="muted" id="progress"></span>
+        </div>
+        <div id="result" class="result" hidden></div>
+      </div>
+    </section>
+
+    <footer>
+      © Week 43-2025 Cybercrimeinfo quiz
+    </footer>
+  </div>
+
+  <script>
+    // ————————————————
+    //  Quiz data (pas wekelijks aan)
+    // ————————————————
+    const QUESTIONS = [
+      {cat:"Politiek en Beleid (Verkiezingen 2025)", q:"Welke twee politieke partijen pleiten in hun verkiezingsprogramma van 2025 voor de oprichting van een Ministerie van Digitale Zaken, verantwoordelijk voor het verbeteren van de digitale weerbaarheid in Nederland?", opts:{A:"CDA en VVD", B:"D66 en Volt", C:"GroenLinks/PVDA en ChristenUnie", D:"SP en JA21"}, a:"C"},
+      {cat:"Politiek en Beleid (Verkiezingen 2025)", q:"Welke politieke partij benadrukt het belang van digitale soevereiniteit en het verminderen van de afhankelijkheid van buitenlandse techbedrijven om de democratie te behouden?", opts:{A:"Het CDA", B:"De VVD", C:"D66", D:"De SP"}, a:"A"},
+      {cat:"Politiek en Beleid (Verkiezingen 2025)", q:"Welke toezichthouder waarschuwde recentelijk tegen het gebruik van AI-chatbots voor stemadvies, omdat deze chatbots vaak niet transparant zijn en een vertekend verkiezingsresultaat kunnen veroorzaken?", opts:{A:"De Nederlandse Bank (DNB)", B:"De Autoriteit Persoonsgegevens (AP)", C:"De Autoriteit Financiële Markten (AFM)", D:"De Algemene Inlichtingen- en Veiligheidsdienst (AIVD)"}, a:"B"},
+      {cat:"Politiek en Beleid (Verkiezingen 2025)", q:"Welke politieke partij stelt dat de overheid meer verantwoordelijkheid moet nemen voor de digitale veiligheid van haar burgers en pleit voor meer toezicht op digitale platforms die een bedreiging vormen voor de privacy van gebruikers?", opts:{A:"GroenLinks/PVDA", B:"De SP", C:"JA21", D:"Volt"}, a:"B"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Welke kritieke kwetsbaarheid in een proxyserver (CVE-2025-62518) heeft deze week een CVSS-score van 10.0 gekregen, omdat het kan leiden tot het lekken van vertrouwelijke HTTP-authenticatiegegevens?", opts:{A:"Apache Syncope", B:"Squid-proxyserver", C:"Ivanti Connect Secure", D:"Redis"}, a:"B"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Welke kritieke kwetsbaarheid (CVE-2025-59287) in Windows Server vereiste een noodpatch omdat het RCE (Remote Code Execution) met SYSTEM-rechten mogelijk maakte en een CVSS-score van 9,8 heeft?", opts:{A:"Windows Disk Cleanup Tool", B:"Windows SMB-client", C:"Windows Server Update Service (WSUS)", D:"Microsoft Kestrel-webserver"}, a:"C"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Welk e-commerce platform werd dringend geadviseerd een patch te installeren voor een kritieke kwetsbaarheid (CVE-2025-54236) die volledige controle over webwinkels (RCE) mogelijk maakt, en waarvoor Proof-of-Concept exploitcode openbaar is gemaakt?", opts:{A:"Shopify", B:"Adobe Commerce en Magento", C:"WordPress met GutenKit plug-ins", D:"Kentico Xperience"}, a:"B"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Welke kwetsbare firewalls (CVE-2025-9242) werden deze week in Nederland en België geïdentificeerd, waarvoor al eerder een patch was uitgebracht, maar die nog steeds actief werden misbruikt voor RCE?", opts:{A:"Cisco firewalls", B:"Zyxel ATP en USG serie firewalls", C:"WatchGuard Firebox-firewalls", D:"Huawei Home Gateways"}, a:"C"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Welke ransomwaregroep wordt verantwoordelijk gehouden voor de aanval op Albert Heijn-franchisenemer Bun, waarbij duizenden gegevens van medewerkers, waaronder kopieën van paspoorten en salarisinformatie, werden gestolen en gepubliceerd?", opts:{A:"Qilin-ransomwaregroep", B:"Monolock Ransomware V1.0", C:"ThreeAM", D:"Everest"}, a:"C"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Welke Russische cyberespionagegroep viel deze week een Europees telecombedrijf aan en gebruikte de malware Snappybee, vermoedelijk de opvolger van ShadowPad?", opts:{A:"Star Blizzard", B:"COLDRIVER", C:"Salt Typhoon", D:"Cavalry Werewolf APT"}, a:"C"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Welke statelijke actor werd deze week beschuldigd van het financieren van zijn nucleaire programma door miljarden dollars te stelen via cryptocurrency-exchanges en het aannemen van valse technische banen bij buitenlandse bedrijven?", opts:{A:"China", B:"Iran (via MuddyWater)", C:"Rusland (via COLDRIVER)", D:"Noord-Korea"}, a:"D"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Welk Europees ministerie kreeg te maken met een datalek, waarbij persoonlijke gegevens van 272.000 personeelsleden werden gepubliceerd op het Dark Web, nadat Russische hackers toegang kregen via een contractant?", opts:{A:"Het Nederlandse ministerie van Defensie", B:"Het Duitse ministerie van Buitenlandse Zaken", C:"Het Britse ministerie van Defensie", D:"Het Belgische parlement"}, a:"C"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke geavanceerde infostealer-malware gebruikt de EtherHiding-techniek om command-and-control (C2)-communicatie te verbergen via de BNB Smart Chain Testnet (blockchain)?", opts:{A:"SnakeStealer", B:"SharkStealer", C:"Odyssey Stealer", D:"Aura Stealer"}, a:"B"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke functie van Microsoft 365 Exchange, oorspronkelijk bedoeld voor legacy-apparaten, wordt misbruikt door cybercriminelen om phishing-e-mails te sturen die afkomstig lijken van vertrouwde interne bronnen (zoals leidinggevenden), waarmee zij inhoudsfilters omzeilen?", opts:{A:"De Multi-Factor Authentication (MFA)-functie", B:"De Azure File Sync-functie", C:"De Direct Send-functie", D:"De Cloud App Security-functie"}, a:"C"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke *fileless*-malware gebruikt de techniek om zichzelf te injecteren in het legitieme Windows-bestand RmClient.exe om Endpoint Detection and Response (EDR)-systemen te omzeilen?", opts:{A:"CAPI Backdoor", B:"Remcos-malware", C:"Winos 4.0-malware", D:"Phoenix-backdoor"}, a:"B"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke hacker-groep richt zich op Oekraïense humanitaire organisaties en regionale overheden met de PhantomCaptcha-aanval, waarbij slachtoffers werden misleid om een kwaadaardige PowerShell-opdracht uit te voeren?", opts:{A:"MuddyWater", B:"COLDRIVER", C:"Cavalry Werewolf APT", D:"Onderzoekers vermoeden Russische actoren"}, a:"D"},
+      {cat:"Rechtspraak, Datalekken en Fraude", q:"Waarvoor werd een IT-leverancier door de rechtbank Noord-Nederland aansprakelijk gesteld voor de schade na een hack van een Azure-omgeving van een klant?", opts:{A:"Het gebruik van verouderde software", B:"Het niet inschakelen van multifactorauthenticatie (MFA)", C:"Het niet tijdig melden van het datalek", D:"Het delen van inloggegevens op het dark web"}, a:"B"},
+      {cat:"Rechtspraak, Datalekken en Fraude", q:"Welk incident leidde ertoe dat de Friese afvalverwerker Omrin tijdelijk de Afvalapp moest uitschakelen, de klantenservice onbereikbaar was, en er een datalek werd ontdekt?", opts:{A:"Een aanval door de Genesis-groep", B:"Een DDoS-aanval", C:"Een ransomware-aanval", D:"Een kwetsbaarheid in de Fortinet-systemen"}, a:"C"},
+      {cat:"Rechtspraak, Datalekken en Fraude", q:"Welke tech-leverancier voor Europese luchthavens meldde een hack waarbij aanvallers toegang kregen via een gestolen FTP-wachtwoord, wat leidde tot vluchtannuleringen en het lekken van 1,5 miljoen passagiersrecords?", opts:{A:"Microsoft", B:"Collins Aerospace", C:"Jaguar Land Rover", D:"Amazon Web Services (AWS)"}, a:"B"},
+      {cat:"Rechtspraak, Datalekken en Fraude", q:"Welke criminele activiteit wordt beschreven waarbij oplichters zich voordoen als medewerkers van telecomprovider Proximus, valse apps via WhatsApp versturen en zo controle krijgen over de mobiele bankdiensten van Android-gebruikers?", opts:{A:"Ransomware-aanval", B:"Bankhelpdeskfraude", C:"Social engineering-aanval gericht op KBC-klanten", D:"Valse vacature-oplichting"}, a:"C"}
+    ];
+
+    // ————————————————
+    //  Render quiz
+    // ————————————————
+    const $quiz = document.getElementById('quiz');
+    const $progress = document.getElementById('progress');
+    const $result = document.getElementById('result');
+    const $submit = document.getElementById('submit');
+    const $reset = document.getElementById('reset');
+
+    function render() {
+      $quiz.innerHTML = '';
+      QUESTIONS.forEach((it, idx) => {
+        const qId = `q${idx+1}`;
+        const wrap = document.createElement('div');
+        wrap.className = 'q';
+        wrap.innerHTML = `
+          <div class="meta">Categorie: <strong>${it.cat}</strong> · Vraag ${idx+1} van ${QUESTIONS.length}</div>
+          <h3>${it.q}</h3>
+          <div class="options">
+            ${Object.entries(it.opts).map(([key, val]) => `
+              <label class="opt" for="${qId}${key}">
+                <input type="radio" id="${qId}${key}" name="${qId}" value="${key}" />
+                <span><strong>${key})</strong> ${val}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        $quiz.appendChild(wrap);
+      });
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const answered = [...document.querySelectorAll('.q')].filter(q => q.querySelector('input[type=radio]:checked')).length;
+      $progress.textContent = `${answered}/${QUESTIONS.length} beantwoord`;
+    }
+
+    function firstUnanswered() {
+      for (let i=0;i<QUESTIONS.length;i++) {
+        const qId = `q${i+1}`;
+        if (!document.querySelector(`input[name=${CSS.escape(qId)}]:checked`)) return i;
+      }
+      return -1;
+    }
+
+    function disableAll() {
+      document.querySelectorAll('input[type=radio]').forEach(el => el.disabled = true);
+      $submit.disabled = true;
+    }
+
+    function enableAll() {
+      document.querySelectorAll('input[type=radio]').forEach(el => el.disabled = false);
+      $submit.disabled = false;
+      $result.hidden = true;
+    }
+
+    function resetAll() {
+      document.querySelectorAll('input[type=radio]:checked').forEach(el => el.checked = false);
+      document.querySelectorAll('.perq').forEach(el => el.remove());
+      enableAll();
+      updateProgress();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function grade() {
+      let score = 0;
+      // clear previous per-question feedback
+      document.querySelectorAll('.perq').forEach(el => el.remove());
+
+      QUESTIONS.forEach((it, idx) => {
+        const qId = `q${idx+1}`;
+        const chosen = document.querySelector(`input[name=${CSS.escape(qId)}]:checked`);
+        const correctLetter = it.a;
+        const correctText = it.opts[correctLetter];
+        const host = $quiz.children[idx];
+
+        const box = document.createElement('div');
+        box.className = 'perq';
+        if (chosen && chosen.value === correctLetter) {
+          score++;
+          box.innerHTML = `<div class="badge ok">✓ Goed</div> <span class="muted">Juiste optie: <span class="key">${correctLetter}) ${correctText}</span></span>`;
+        } else {
+          const user = chosen ? `${chosen.value}) ${it.opts[chosen.value]}` : '—';
+          box.innerHTML = `<div class="badge ko">✗ Fout</div> <span class="muted">Jouw keuze: <span class="key">${user}</span></span><br><span>Juiste antwoord: <span class="key">${correctLetter}) ${correctText}</span></span>`;
+        }
+        host.appendChild(box);
+      });
+
+      const pct = Math.round((score / QUESTIONS.length) * 100);
+      $result.hidden = false;
+      $result.innerHTML = `
+        <strong>Score</strong><br>
+        Je scoorde <strong>${score}</strong> van de <strong>${QUESTIONS.length}</strong> vragen (<strong>${pct}%</strong>).
+        <div class="stat">
+          <div><span class="badge ${pct>=80? 'ok': pct>=60? 'warn' : 'ko'}">${pct}%</span> Behaalde percentage</div>
+          <div><span class="badge">${new Date().toLocaleDateString('nl-NL')}</span> Ingevuld op</div>
+        </div>
+      `;
+    }
+
+    // Wire up
+    render();
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('input[type=radio]')) updateProgress();
+    });
+
+    $submit.addEventListener('click', () => {
+      const i = firstUnanswered();
+      if (i !== -1) {
+        document.querySelectorAll('.q')[i].scrollIntoView({behavior:'smooth', block:'center'});
+        $result.hidden = false;
+        $result.innerHTML = '<span class="badge warn">Let op</span> Je hebt nog niet alle vragen beantwoord.';
+        return;
+      }
+      grade();
+      disableAll();
+      $result.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+
+    $reset.addEventListener('click', resetAll);
+  </script>
+</body>
+</html>
